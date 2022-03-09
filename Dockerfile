@@ -16,7 +16,7 @@ RUN case $TARGETARCH in \
 esac;
 
 RUN export ARCH=$(cat arch); \
-    wget -O Prowlarr.tar.gz "https://github.com/Prowlarr/Prowlarr/releases/download/v${VERSION}/Prowlarr.master.${VERSION}.linux-core-${ARCH}.tar.gz"; \
+    wget -O Prowlarr.tar.gz "https://github.com/Prowlarr/Prowlarr/releases/download/v${VERSION}/Prowlarr.develop.${VERSION}.linux-core-${ARCH}.tar.gz"; \
     tar xzvf Prowlarr.tar.gz -C /opt; \
     rm -f Prowlarr.tar.gz arch; \
     test -f /opt/Prowlarr/Prowlarr && echo "installed successfully" || exit 1
