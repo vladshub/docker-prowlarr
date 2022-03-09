@@ -1,0 +1,63 @@
+name: Release Updated
+
+on:
+  schedule:
+  - cron: "0 * * * *"
+  push:
+    branches: [ main ]
+
+
+
+jobs:
+  get-latest-version:
+    name: Get Latest Version
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag}}
+    steps:
+      - name: Get latest version
+        id: version
+        run: |
+          get_latest_release() {
+            curl --silent https://api.github.com/repos/$1/releases | jq -r ".[0].name"
+          }
+          echo "::set-output name=tag::$(get_latest_release "Prowlarr/Prowlarr")"
+
+  tag:
+    name: Tag
+    needs: get-latest-version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Checkout branch "master"
+        uses: actions/checkout@v2
+
+      - name: Create tag
+        uses: actions/github-script@v5
+        with:
+          script: |
+            try {
+              const result = await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'tags/v${{ needs.get-latest-version.outputs.tag }}'
+              });
+              console.log("tag: v${{ needs.get-latest-version.outputs.tag }} already exists");
+            } catch(error) {
+              console.log("creating tag: v${{ needs.get-latest-version.outputs.tag }}");
+              github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/tags/v${{ needs.get-latest-version.outputs.tag }}',
+                sha: context.sha
+              });
+            }
