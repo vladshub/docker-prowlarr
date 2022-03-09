@@ -12,7 +12,7 @@ on:
   push:
     branches: [ main ]
     # Publish semverish tags as releases.
-    tags: [ 'v*', 'v*.*.*.*' ]
+    tags: [ 'v*', 'v*.*.*.*', 'v**' ]
   pull_request:
     branches: [ main ]
 
